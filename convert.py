@@ -1,5 +1,6 @@
 """Conversion script for your video files."""
 import argparse
+from binaryornot.check import is_binary
 import os
 import ffmpeg
 
@@ -12,13 +13,13 @@ from typing import Union
 SUPPORTED_TYPES = {
     'video': {
         'containers':{
-            'asf': ['h264', 'mpeg4', 'mjpeg', 'wmv2', 'wmv3'],
-            'avi': ['h264', 'mpeg4', 'mjpeg'],
-            'mkv': ['h264', 'mpeg4', 'mjpeg'],
-            'mp4': ['h264', 'mpeg4'],
-            '3gpp': ['h264', 'mpeg4'],
-            'mpeg': ['mpeg1video', 'mpeg2video', 'h264'],
-            'mpegts': ['mpeg2video', 'h264', 'vc1'],
+            'asf': ['h264', 'mpeg4', 'mjpeg', 'wmv2', 'wmv3', 'png'],
+            'avi': ['h264', 'mpeg4', 'mjpeg', 'png'],
+            'mkv': ['h264', 'mpeg4', 'mjpeg', 'png'],
+            'mp4': ['h264', 'mpeg4', 'png'],
+            '3gpp': ['h264', 'mpeg4', 'png'],
+            'mpeg': ['mpeg1video', 'mpeg2video', 'h264', 'png'],
+            'mpegts': ['mpeg2video', 'h264', 'vc1', 'png'],
         }
 
     },
@@ -62,8 +63,7 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
     print(f"Checking {path}...")
 
     # Check if the path is actually a video
-    if path.endswith('txt'):
-        print("\tNot a video file, skipping...")
+    if not is_binary(path):
         return
     try:
         info = ffmpeg.probe(path)
@@ -77,7 +77,8 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
     for stream in info['streams']:
         for type_ in ['video', 'audio']:
             if stream['codec_type'] == type_:
-                codecs = SUPPORTED_TYPES[type_]['containers'][container]
+                supported_containers = SUPPORTED_TYPES[type_]['containers']
+                codecs = supported_containers.get(container, None)
                 # If the codec is not supported, a conversion must happen
                 if stream['codec_name'] not in codecs:
                     print("\t{} is not supported".format(stream['codec_name']))
