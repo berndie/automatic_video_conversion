@@ -80,6 +80,7 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
                 codecs = SUPPORTED_TYPES[type_]['containers'][container]
                 # If the codec is not supported, a conversion must happen
                 if stream['codec_name'] not in codecs:
+                    print("\t{} is not supported".format(stream['codec_name']))
                     to_convert += [type_]
 
     if len(to_convert) == 0:
@@ -113,6 +114,7 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
         print(f'\tDone! {path}')
     else:
         print(f'\tDone! {new_path}')
+    return to_convert
 
 
 if __name__ == "__main__":
@@ -139,16 +141,30 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    total_converted = []
     # Check whether a folder or a single file was given.
     if os.path.isdir(args.path):
         for root, dirs, files in os.walk(args.path):
             for file in files:
-                convert(
+                result = convert(
                     os.path.join(root, file),
                     args.dry_run,
                     args.replace
                 )
+                if result is not None:
+                    total_converted += [result]
     else:
-        convert(args.path, args.dry_run, args.replace)
+        result = convert(args.path, args.dry_run, args.replace)
+        if result is not None:
+            total_converted += [result]
 
     print('Conversion completed')
+    print(
+        'Converted {} files. '
+        '({} due to video+audio, {} due to video, {} due to audio'.format(
+            len(total_converted),
+            len([x for x in total_converted if 'video' in x and 'audio' in x]),
+            len([x for x in total_converted if 'video' in x]),
+            len([x for x in total_converted if 'audio' in x])
+        )
+    )
