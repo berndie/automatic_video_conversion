@@ -73,14 +73,14 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
 
     # Check whether conversion is necessary
     to_convert = []
-    container = os.path.basename(path).split('.')[-1]
+    container = os.path.basename(path).split('.')[-1].lower()
     for stream in info['streams']:
         for type_ in ['video', 'audio']:
             if stream['codec_type'] == type_:
                 supported_containers = SUPPORTED_TYPES[type_]['containers']
                 codecs = supported_containers.get(container, None)
                 # If the codec is not supported, a conversion must happen
-                if stream['codec_name'] not in codecs:
+                if codecs is None or stream['codec_name'] not in codecs:
                     print("\t{} is not supported".format(stream['codec_name']))
                     to_convert += [type_]
 
