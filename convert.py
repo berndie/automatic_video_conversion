@@ -162,7 +162,7 @@ if __name__ == "__main__":
     print('Conversion completed')
     print(
         'Converted {} files. '
-        '({} due to video+audio, {} due to video, {} due to audio'.format(
+        '({} due to video+audio, {} due to video, {} due to audio)'.format(
             len(total_converted),
             len([x for x in total_converted if 'video' in x and 'audio' in x]),
             len([x for x in total_converted if 'video' in x]),
