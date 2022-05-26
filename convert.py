@@ -20,6 +20,8 @@ SUPPORTED_TYPES = {
             '3gpp': ['h264', 'mpeg4', 'png'],
             'mpeg': ['mpeg1video', 'mpeg2video', 'h264', 'png'],
             'mpegts': ['mpeg2video', 'h264', 'vc1', 'png'],
+            'png': ['png'],
+            'jpg': ['jpg', 'mjpeg']
         }
 
     },
@@ -110,7 +112,7 @@ def convert(path: Union[Path, str], dry_run=False, replace=False):
         ffmpeg.input(path).output(new_path, **extra_options).run()
 
     # Check if the original file should be replaced
-    if replace:
+    if replace and not dry_run:
         os.rename(new_path, path)
         print(f'\tDone! {path}')
     else:
